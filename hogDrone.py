@@ -3,8 +3,28 @@ from sklearn import svm
 import sys
 import numpy as np
 
-image = cv2.imread('circle.jpg',0)
-blank = cv2.imread('blank.jpg',0)
+from os import listdir
+from os.path import isfile, join
+
+mypath = "./training/positive/64_108/"
+
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+
+for f in onlyfiles:
+	if not(f[-1] == "G"):
+		onlyfiles.remove(f)
+
+
+"""for i in range(0,len(onlyfiles)):
+	print(mypath+onlyfiles[i])
+	pic = cv2.imread(mypath+onlyfiles[i])
+	cv2.imshow("image" + str(i),pic)
+
+
+cv2.waitKey(0)
+exit()"""
+
 
 winSize = (64,64)
 blockSize = (16,16)
@@ -38,24 +58,6 @@ test = [features.flatten()]
 print(clf.predict(test))
 
 
-
-
-testIm = np.zeros((512,512,3))
-
-cv2.circle(testIm,(255,255),25,(255,0,0),2);
-
-cv2.rectangle(testIm,(20,300),(40,320),(255,255,255),2);
-
-cv2.circle(testIm,(255,455),25,(0,0,255),2);
-
-cv2.circle(testIm,(455,155),20,(0,255,0),2);
-
-cv2.circle(testIm,(455,55),20,(0,255,0),2);
-
-
-cv2.circle(testIm,(45,155),20,(0,255,0),2);
-
-cv2.circle(testIm,(455,355),20,(0,255,0),2);
 
 
 for k in range (10,9,-1): #increase scales
