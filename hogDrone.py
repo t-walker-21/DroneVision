@@ -6,30 +6,27 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 
-mypath = "./training/positive/64_108/"
+myPosPath = "./training/positive/200_200/"
+myNegPath = "./training/negative/"
 
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-
-
-for f in onlyfiles:
-	if not(f[-1] == "G"):
-		onlyfiles.remove(f)
+posFiles = [f for f in listdir(myPosPath) if isfile(join(myPosPath, f))]
+negFiles = [f for f in listdir(myNegPath) if isfile(join(myNegPath, f))]
 
 
-"""for i in range(0,len(onlyfiles)):
-	print(mypath+onlyfiles[i])
-	pic = cv2.imread(mypath+onlyfiles[i])
-	cv2.imshow("image" + str(i),pic)
+for f in posFiles:
+	if not(f[-1] == "g"):
+		posFiles.remove(f)
 
+for f in negFiles:
+	if not(f[-1] == "g"):
+		negFiles.remove(f)
 
-cv2.waitKey(0)
-exit()"""
+ 
 
-
-winSize = (64,64)
-blockSize = (16,16)
-blockStride = (8,8)
-cellSize = (8,8)  #16,16
+winSize = (200,200)
+blockSize = (20,20)
+blockStride = (10,10)
+cellSize = (10,10)  #16,16
 nbins = 9 
 derivAperture = 1
 winSigma = -1.
@@ -42,51 +39,78 @@ useSignedGradients = False
  
 hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels, useSignedGradients)
 
-features = hog.compute(image)
-features2 = hog.compute(blank)
+sizeFeat = hog.compute(cv2.imread(myPosPath+posFiles[0]))
 
-y = ['circle','not']
+features = []
+labels = []
 
-X = [features.flatten(),features2.flatten()]
+print("LOADING IMAGES AND EXTRACTING HOG FEATURES")
+
+for i in range(0,len(posFiles)):
+	picPos = cv2.imread(myPosPath+posFiles[i])
+	picNeg = cv2.imread(myNegPath+negFiles[i])
+	#cv2.imshow("positive training image",picPos)
+	#cv2.imshow("negative training image",picNeg)
+	#cv2.waitKey(0)
+	featsPos = hog.compute(picPos)
+	featsNeg = hog.compute(picNeg)
+	featsPos = featsPos.flatten()
+	featsNeg = featsNeg.flatten()
+	features.append(featsPos)	
+	features.append(featsNeg)
+	labels.append('stop sign')
+	labels.append('not')
+
+
+
+
+
+#features = [features.flatten()]
+#labels = [labels.flatten()]	
+
+
+
 
 clf = svm.SVC()
-clf.kernel = 'linear'
+clf.kernel = 'rbf'
 
-clf.fit(X,y)
+print("TRAINING SVM MODEL")
 
-test = [features.flatten()]
-print(clf.predict(test))
+clf.fit(features,labels)
+
+testIm = cv2.imread(sys.argv[1])
 
 
 
 
-for k in range (10,9,-1): #increase scales
+for k in range (int(sys.argv[2]),50): #increase scales
 		print("at scale " , k)
 		adj = k*0.1 #move decimal one to the left to increase a tenth at a time 
 		resized = cv2.resize(testIm,(0,0),fx=adj,fy=adj) #resize image
 
-		for j in range(0,len(resized)-64,k): #move window down
+		for j in range(0,len(resized)-200,k): #move window down
 
-			for i in range(0,len(resized[0]) - 64,k): #move window right
-				roi = resized[j:j+64,i:i+64] #extract region of interest to check for qr code
+			for i in range(0,len(resized[0]) - 200,k): #move window right
+				roi = resized[j:j+200,i:i+200] #extract region of interest to check for qr code
 				copy = resized.copy()
 				cv2.imwrite('pass.jpg',roi) #write ROI to file to pass into qr reader
 				testFeats = hog.compute(cv2.imread('pass.jpg'))
 				test = [testFeats.flatten()]
 
 				result = clf.predict(test)
+				#print(result)
 
 				#data visualization - leave uncommented for speed				
 
-				#cv2.rectangle(copy,(i,j),(i + 100,j + 100),(0,255,0))
-				
-				if (result == 'circle'):
+				cv2.rectangle(copy,(i,j),(i + 200,j + 200),(0,255,0))
+				#cv2.imshow("sliding window",copy)
+			 	#cv2.waitKey(1)	
+				if (result[0] == 'stop sign'):
 					cv2.imshow("image",roi)
-					cv2.rectangle(testIm,(i,j),(i+64,j+64),(0,0,255),3)
-					cv2.imshow('Detected Circles',testIm)
-					#cv2.waitKey(0)
-					print(j,i)
-				#cv2.waitKey(1)
+					#cv2.rectangle(testIm,(i,j),(i+64,j+64),(0,0,255),3)
+					#cv2.imshow('Detected Stop Signs',testIm)
+					cv2.waitKey(0)
+				
 				
 				 	
 
@@ -94,5 +118,4 @@ for k in range (10,9,-1): #increase scales
 
 
 
-cv2.moveWindow('Detected Circles',500,500)
 cv2.waitKey(0)
