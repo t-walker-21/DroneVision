@@ -28,10 +28,10 @@ for f in negFiles:
  
 
 winSize = (wSize,wSize)
-blockSize = (32,32)
-blockStride = (16,16)
-cellSize = (16,16)  #16,16
-nbins = 20 
+blockSize = (8,8)
+blockStride = (4,4)
+cellSize = (4,4)  #16,16
+nbins = 9
 derivAperture = 1
 winSigma = -1.
 histogramNormType = 0
@@ -84,6 +84,8 @@ clf.fit(features,labels)
 
 testIm = cv2.imread(sys.argv[1])
 
+
+#testIm = blur = cv2.blur(testIm,(15,15))
 
 
 for k in range (int(sys.argv[2]),50): #increase scales
