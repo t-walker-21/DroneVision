@@ -98,8 +98,9 @@ for k in range (int(sys.argv[2]),50): #increase scales
 			for i in range(0,len(resized[0]) - wSize,k): #move window right
 				roi = resized[j:j+wSize,i:i+wSize] #extract region of interest to check for qr code
 				copy = resized.copy()
-				cv2.imwrite('pass.jpg',roi) #write ROI to file to pass into qr reader
-				testFeats = hog.compute(cv2.imread('pass.jpg'))
+				#cv2.imwrite('pass.jpg',roi) #write ROI to file to pass into qr reader
+				#testFeats = hog.compute(cv2.imread('pass.jpg'))
+				testFeats = hog.compute(roi)
 				test = [testFeats.flatten()]
 
 				result = clf.predict(test)
