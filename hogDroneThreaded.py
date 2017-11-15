@@ -7,23 +7,27 @@ from thread import start_new_thread
 from os import listdir
 from os.path import isfile, join
 
+cont = 0
+
 def client_thread(pos):
 
-	for x in range(0,len(resized[0])-wSize):
-		#copy = resized.copy()
-		#cv2.rectangle(copy,(x,pos),(x+wSize,pos+wSize),(0,0,255),3)
-		#cv2.imshow("regions",copy)
+	for x in range(0,len(resized[0])-wSize,16):
+		copy = resized.copy()
+		
 		#cv2.waitKey(1)
 		roi = resized[pos:pos+wSize,x:x+wSize] #extract region of interest to check for qr code
 		#copy = resized.copy()
-		#cv2.imshow("thread",roi)
+		#cv2.rectangle(copy,(x,pos),(x+wSize,pos+wSize),(0,0,255),3)
+		#cv2.imshow("original image",resized)
+		#cv2.imshow("small",roi)
 		#cv2.waitKey(1)
-		cv2.imwrite(str(pos)+"pass.jpg",roi) #write ROI to file to pass into qr reader
-		testFeats = hog.compute(cv2.imread(str(pos)+"pass.jpg"))
+		#cv2.imwrite(str(pos)+"pass.jpg",roi) #write ROI to file to pass into qr reader
+		#testFeats = hog.compute(cv2.imread(str(pos)+"pass.jpg"))
+		testFeats = hog.compute(roi)
 		test = [testFeats.flatten()]
 
 		result = clf.predict(test)
-		print(result)
+		#print(result)
 
 			#data visualization - leave uncommented for speed				
 
@@ -31,9 +35,14 @@ def client_thread(pos):
 		#cv2.imshow("sliding window",copy)
 		#cv2.waitKey(1)	
 		if (result[0] == 'drone'):
-			cv2.imshow("Detected Drones",roi)
+			#cv2.imshow("Detected Drones",roi)
 			#cv2.rectangle(testIm,(i,j),(i+wSize,j+wSize),(0,0,255),3)
-			#cv2.imshow('Detected Stop Signs',testIm)
+			
+			print "detected drone"
+			global cont
+			
+			cont = 1
+			exit()
 			cv2.waitKey(0)
 	
 
@@ -125,13 +134,17 @@ print("at scale " , k)
 adj = k*0.1 #move decimal one to the left to increase a tenth at a time 
 resized = cv2.resize(testIm,(0,0),fx=adj,fy=adj) #resize image
 
-cv2.imshow("circled",resized)
+#cv2.imshow("original image",resized)
+#cv2.namedWindow("small")
 			
-for t in range(0,len(resized),1):
-	start_new_thread(client_thread,(i,))	
+for t in range(0,len(resized)-wSize,2):
+	start_new_thread(client_thread,(t,))	
 
-				
 cv2.waitKey(0)
+
+while not cont:
+	garb = 3		
+exit()
 
 
 

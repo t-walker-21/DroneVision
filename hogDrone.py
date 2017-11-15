@@ -88,7 +88,7 @@ testIm = cv2.imread(sys.argv[1])
 #testIm = blur = cv2.blur(testIm,(15,15))
 
 
-for k in range (int(sys.argv[2]),50): #increase scales
+for k in range (int(sys.argv[2]),15): #increase scales
 		print("at scale " , k)
 		adj = k*0.1 #move decimal one to the left to increase a tenth at a time 
 		resized = cv2.resize(testIm,(0,0),fx=adj,fy=adj) #resize image
@@ -114,7 +114,8 @@ for k in range (int(sys.argv[2]),50): #increase scales
 				if (result[0] == 'drone'):
 					cv2.imshow("Detected Drones",roi)
 					#cv2.rectangle(testIm,(i,j),(i+wSize,j+wSize),(0,0,255),3)
-					#cv2.imshow('Detected Stop Signs',testIm)
+					
+					print "detected drone"
 					cv2.waitKey(0)
 				
 				
