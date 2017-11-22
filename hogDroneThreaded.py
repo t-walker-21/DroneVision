@@ -7,6 +7,8 @@ from thread import start_new_thread
 from os import listdir
 from os.path import isfile, join
 
+
+global cont
 cont = 0
 
 def client_thread(pos):
@@ -16,11 +18,11 @@ def client_thread(pos):
 		
 		#cv2.waitKey(1)
 		roi = resized[pos:pos+wSize,x:x+wSize] #extract region of interest to check for qr code
-		#copy = resized.copy()
-		#cv2.rectangle(copy,(x,pos),(x+wSize,pos+wSize),(0,0,255),3)
-		#cv2.imshow("original image",resized)
-		#cv2.imshow("small",roi)
-		#cv2.waitKey(1)
+		copy = resized.copy()
+		cv2.rectangle(copy,(x,pos),(x+wSize,pos+wSize),(0,0,255),3)
+		cv2.imshow("original image",resized)
+		cv2.imshow("small",roi)
+		cv2.waitKey(1)
 		#cv2.imwrite(str(pos)+"pass.jpg",roi) #write ROI to file to pass into qr reader
 		#testFeats = hog.compute(cv2.imread(str(pos)+"pass.jpg"))
 		testFeats = hog.compute(roi)
@@ -44,6 +46,10 @@ def client_thread(pos):
 			cont = 1
 			exit()
 			cv2.waitKey(0)
+	global cont	
+	cont = 1
+	print "no drones found"	
+	return
 	
 
 
@@ -137,7 +143,7 @@ resized = cv2.resize(testIm,(0,0),fx=adj,fy=adj) #resize image
 #cv2.imshow("original image",resized)
 #cv2.namedWindow("small")
 			
-for t in range(0,len(resized)-wSize,2):
+for t in range(0,len(resized)/3,2):
 	start_new_thread(client_thread,(t,))	
 
 cv2.waitKey(0)
