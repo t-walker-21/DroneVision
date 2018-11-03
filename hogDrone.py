@@ -37,7 +37,7 @@ nlevels = 64
 useSignedGradients = False
 
  
-hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels, useSignedGradients)
+hog = cv2.HOGDescriptor()
 
 sizeFeat = hog.compute(cv2.imread(myPosPath+posFiles[0]))
 
